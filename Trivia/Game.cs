@@ -52,7 +52,6 @@ namespace UglyTrivia
             return $"{name} Question {index}";
         }
 
-
         private bool AddPlayer(string name)
         {
             players.Add(name);
@@ -77,7 +76,8 @@ namespace UglyTrivia
 
         public void Roll(int roll)
         {
-            Console.WriteLine(players[currentPlayer] + " is the current player");
+            string playerName = players[currentPlayer];
+            Console.WriteLine(playerName + " is the current player");
             Console.WriteLine("They have rolled a " + roll);
 
             if (inPenaltyBox[currentPlayer])
@@ -85,34 +85,49 @@ namespace UglyTrivia
                 if (roll % 2 != 0)
                 {
                     isGettingOutOfPenaltyBox = true;
-
-                    Console.WriteLine(players[currentPlayer] + " is getting out of the penalty box");
-                    places[currentPlayer] = places[currentPlayer] + roll;
-                    if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
-
-                    Console.WriteLine(players[currentPlayer]
-                            + "'s new location is "
-                            + places[currentPlayer]);
-                    Console.WriteLine("The category is " + GetCategory());
+                    WriteInfoPlayerOutOfPenaltyBox(playerName);
+                    int place = places[currentPlayer] = SetPlayerBack(roll, places[currentPlayer]);
+                    WriteInfoCurrentPLayer(playerName, place, GetCategory());
                     askQuestion();
                 }
                 else
                 {
-                    Console.WriteLine(players[currentPlayer] + " is not getting out of the penalty box");
+                    WritePlayerNotGettingOut(playerName);
                     isGettingOutOfPenaltyBox = false;
                 }
             }
             else
             {
-                places[currentPlayer] = places[currentPlayer] + roll;
-                if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
-
-                Console.WriteLine(players[currentPlayer]
-                        + "'s new location is "
-                        + places[currentPlayer]);
-                Console.WriteLine("The category is " + GetCategory());
+                int place = places[currentPlayer] = SetPlayerBack(roll, places[currentPlayer]);
+                WriteInfoCurrentPLayer(players[currentPlayer], place, GetCategory());
                 askQuestion();
             }
+        }
+
+        private void WritePlayerNotGettingOut(string playerName)
+        {
+            Console.WriteLine(playerName + " is not getting out of the penalty box");
+        }
+
+        private void WriteInfoCurrentPLayer(string playerName, int playerPlace, string category)
+        {
+            Console.WriteLine(playerName
+                                        + "'s new location is "
+                                        + playerPlace);
+            Console.WriteLine("The category is " + category);
+        }
+
+        private void WriteInfoPlayerOutOfPenaltyBox(string playerName)
+        {
+            Console.WriteLine(playerName + " is getting out of the penalty box");
+        }
+
+        private int SetPlayerBack(int roll, int currentPlace)
+        {
+            currentPlace += roll;
+            if (currentPlace > 11) currentPlace -= 12;
+
+            return currentPlace;
         }
 
         private void askQuestion()
