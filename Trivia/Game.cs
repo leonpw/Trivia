@@ -1,47 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace UglyTrivia
 {
     public class Game
     {
+        private const int AmountOfQuestions = 50;
+        private List<string> players = new List<string>();
 
+        private int[] places = new int[6];
+        private int[] purses = new int[6];
 
-        List<string> players = new List<string>();
+        private bool[] inPenaltyBox = new bool[6];
 
-        int[] places = new int[6];
-        int[] purses = new int[6];
+        private LinkedList<string> popQuestions = new LinkedList<string>();
+        private LinkedList<string> scienceQuestions = new LinkedList<string>();
+        private LinkedList<string> sportsQuestions = new LinkedList<string>();
+        private LinkedList<string> rockQuestions = new LinkedList<string>();
 
-        bool[] inPenaltyBox = new bool[6];
+        private int currentPlayer = 0;
+        private bool isGettingOutOfPenaltyBox;
 
-        LinkedList<string> popQuestions = new LinkedList<string>();
-        LinkedList<string> scienceQuestions = new LinkedList<string>();
-        LinkedList<string> sportsQuestions = new LinkedList<string>();
-        LinkedList<string> rockQuestions = new LinkedList<string>();
+        public Game(IEnumerable<string> playerNames)
+        {
+            AddPlayers(playerNames);
+            GenerateQuestions(AmountOfQuestions);
+        }
 
-        int currentPlayer = 0;
-        bool isGettingOutOfPenaltyBox;
-
-        public Game(string[] playerNames)
+        private void AddPlayers(IEnumerable<string> playerNames)
         {
             foreach (var name in playerNames)
             {
                 AddPlayer(name);
             }
-            for (int i = 0; i < 50; i++)
+        }
+
+        private void GenerateQuestions(int amount)
+        {
+            for (int i = 0; i < amount; i++)
             {
-                popQuestions.AddLast("Pop Question " + i);
-                scienceQuestions.AddLast(("Science Question " + i));
-                sportsQuestions.AddLast(("Sports Question " + i));
-                rockQuestions.AddLast(createRockQuestion(i));
+                popQuestions.AddLast(CreateQuestion(i, "Pop"));
+                scienceQuestions.AddLast(CreateQuestion(i, "Science"));
+                sportsQuestions.AddLast(CreateQuestion(i, "Sports"));
+                rockQuestions.AddLast(CreateQuestion(i, "Rock"));
             }
         }
 
-        public String createRockQuestion(int index)
+        public String CreateQuestion(int index, string name)
         {
-            return "Rock Question " + index;
+            return $"{name} Question {index}";
         }
 
         public bool isPlayable()
@@ -49,14 +57,14 @@ namespace UglyTrivia
             return (howManyPlayers() >= 2);
         }
 
-        private bool AddPlayer(String playerName)
+        private bool AddPlayer(string name)
         {
-            players.Add(playerName);
+            players.Add(name);
             places[howManyPlayers()] = 0;
             purses[howManyPlayers()] = 0;
             inPenaltyBox[howManyPlayers()] = false;
 
-            Console.WriteLine(playerName + " was added");
+            Console.WriteLine(name + " was added");
             Console.WriteLine("They are player number " + players.Count);
             return true;
         }
@@ -69,7 +77,7 @@ namespace UglyTrivia
         public void roll(int roll)
         {
             Console.WriteLine(players[currentPlayer] + " is the current player");
-            Console.WriteLine("They have rolled a " + roll );
+            Console.WriteLine("They have rolled a " + roll);
 
             if (inPenaltyBox[currentPlayer])
             {
@@ -84,7 +92,7 @@ namespace UglyTrivia
                     Console.WriteLine(players[currentPlayer]
                             + "'s new location is "
                             + places[currentPlayer]);
-                    Console.WriteLine("The category is " + currentCategory());
+                    Console.WriteLine("The category is " + GetCategory());
                     askQuestion();
                 }
                 else
@@ -92,63 +100,71 @@ namespace UglyTrivia
                     Console.WriteLine(players[currentPlayer] + " is not getting out of the penalty box");
                     isGettingOutOfPenaltyBox = false;
                 }
-
             }
             else
             {
-
                 places[currentPlayer] = places[currentPlayer] + roll;
                 if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
 
                 Console.WriteLine(players[currentPlayer]
                         + "'s new location is "
                         + places[currentPlayer]);
-                Console.WriteLine("The category is " + currentCategory());
+                Console.WriteLine("The category is " + GetCategory());
                 askQuestion();
             }
-
         }
 
         private void askQuestion()
         {
-            if (currentCategory() == "Pop")
+            if (GetCategory() == "Pop")
             {
                 Console.WriteLine(popQuestions.First());
                 popQuestions.RemoveFirst();
             }
-            if (currentCategory() == "Science")
+            if (GetCategory() == "Science")
             {
                 Console.WriteLine(scienceQuestions.First());
                 scienceQuestions.RemoveFirst();
             }
-            if (currentCategory() == "Sports")
+            if (GetCategory() == "Sports")
             {
                 Console.WriteLine(sportsQuestions.First());
                 sportsQuestions.RemoveFirst();
             }
-            if (currentCategory() == "Rock")
+            if (GetCategory() == "Rock")
             {
                 Console.WriteLine(rockQuestions.First());
                 rockQuestions.RemoveFirst();
             }
         }
 
-
-        private String currentCategory()
+        private String GetCategory()
         {
-            if (places[currentPlayer] == 0) return "Pop";
-            if (places[currentPlayer] == 4) return "Pop";
-            if (places[currentPlayer] == 8) return "Pop";
-            if (places[currentPlayer] == 1) return "Science";
-            if (places[currentPlayer] == 5) return "Science";
-            if (places[currentPlayer] == 9) return "Science";
-            if (places[currentPlayer] == 2) return "Sports";
-            if (places[currentPlayer] == 6) return "Sports";
-            if (places[currentPlayer] == 10) return "Sports";
-            return "Rock";
+            switch (places[currentPlayer])
+            {
+                case 0:
+                case 4:
+                case 8:
+                    return "Pop";
+
+                case 1:
+                case 5:
+                case 9:
+
+                    return "Science";
+
+                case 2:
+                case 6:
+                case 10:
+
+                    return "Sports";
+
+                default:
+                    return "Rock";
+            }
         }
 
-        public bool wasCorrectlyAnswered()
+        public bool IsCorrectAnswer()
         {
             if (inPenaltyBox[currentPlayer])
             {
@@ -173,13 +189,9 @@ namespace UglyTrivia
                     if (currentPlayer == players.Count) currentPlayer = 0;
                     return true;
                 }
-
-
-
             }
             else
             {
-
                 Console.WriteLine("Answer was corrent!!!!");
                 purses[currentPlayer]++;
                 Console.WriteLine(players[currentPlayer]
@@ -195,7 +207,7 @@ namespace UglyTrivia
             }
         }
 
-        public bool wrongAnswer()
+        public bool SetPlayerToPenaltyBox()
         {
             Console.WriteLine("Question was incorrectly answered");
             Console.WriteLine(players[currentPlayer] + " was sent to the penalty box");
@@ -206,11 +218,9 @@ namespace UglyTrivia
             return true;
         }
 
-
         private bool didPlayerWin()
         {
             return !(purses[currentPlayer] == 6);
         }
     }
-
 }

@@ -6,7 +6,7 @@ namespace Trivia
 {
     public class GameRunner
     {
-        private static bool notAWinner;
+        private static bool currentPlayer;
 
         public static void Main(String[] args)
         {
@@ -22,13 +22,13 @@ namespace Trivia
 
                 if (rand.Next(9) == 7)
                 {
-                    notAWinner = aGame.wrongAnswer();
+                    currentPlayer = aGame.SetPlayerToPenaltyBox();
                 }
                 else
                 {
-                    notAWinner = aGame.wasCorrectlyAnswered();
+                    currentPlayer = aGame.IsCorrectAnswer();
                 }
-            } while (notAWinner);
+            } while (currentPlayer);
         }
     }
 }
