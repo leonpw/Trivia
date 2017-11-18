@@ -52,29 +52,30 @@ namespace UglyTrivia
             return $"{name} Question {index}";
         }
 
-        public bool isPlayable()
-        {
-            return (howManyPlayers() >= 2);
-        }
 
         private bool AddPlayer(string name)
         {
             players.Add(name);
-            places[howManyPlayers()] = 0;
-            purses[howManyPlayers()] = 0;
-            inPenaltyBox[howManyPlayers()] = false;
+            places[CountPlayers()] = 0;
+            purses[CountPlayers()] = 0;
+            inPenaltyBox[CountPlayers()] = false;
 
-            Console.WriteLine(name + " was added");
-            Console.WriteLine("They are player number " + players.Count);
+            WritePlayersInfo(name);
             return true;
         }
 
-        public int howManyPlayers()
+        private void WritePlayersInfo(string name)
+        {
+            Console.WriteLine(name + " was added");
+            Console.WriteLine("They are player number " + players.Count);
+        }
+
+        public int CountPlayers()
         {
             return players.Count;
         }
 
-        public void roll(int roll)
+        public void Roll(int roll)
         {
             Console.WriteLine(players[currentPlayer] + " is the current player");
             Console.WriteLine("They have rolled a " + roll);
@@ -116,25 +117,28 @@ namespace UglyTrivia
 
         private void askQuestion()
         {
-            if (GetCategory() == "Pop")
+            switch (GetCategory())
             {
-                Console.WriteLine(popQuestions.First());
-                popQuestions.RemoveFirst();
-            }
-            if (GetCategory() == "Science")
-            {
-                Console.WriteLine(scienceQuestions.First());
-                scienceQuestions.RemoveFirst();
-            }
-            if (GetCategory() == "Sports")
-            {
-                Console.WriteLine(sportsQuestions.First());
-                sportsQuestions.RemoveFirst();
-            }
-            if (GetCategory() == "Rock")
-            {
-                Console.WriteLine(rockQuestions.First());
-                rockQuestions.RemoveFirst();
+                case "Pop":
+                    Console.WriteLine(popQuestions.First());
+                    popQuestions.RemoveFirst();
+                    break;
+
+                case "Science":
+                    Console.WriteLine(scienceQuestions.First());
+                    scienceQuestions.RemoveFirst();
+                    break;
+
+                case "Sports":
+                    Console.WriteLine(sportsQuestions.First());
+                    sportsQuestions.RemoveFirst();
+                    break;
+
+                case "Rock":
+                    Console.WriteLine(rockQuestions.First());
+                    rockQuestions.RemoveFirst();
+
+                    break;
             }
         }
 
@@ -177,7 +181,7 @@ namespace UglyTrivia
                             + purses[currentPlayer]
                             + " Gold Coins.");
 
-                    bool winner = didPlayerWin();
+                    bool winner = DidPlayerWin();
                     currentPlayer++;
                     if (currentPlayer == players.Count) currentPlayer = 0;
 
@@ -199,7 +203,7 @@ namespace UglyTrivia
                         + purses[currentPlayer]
                         + " Gold Coins.");
 
-                bool winner = didPlayerWin();
+                bool winner = DidPlayerWin();
                 currentPlayer++;
                 if (currentPlayer == players.Count) currentPlayer = 0;
 
@@ -218,7 +222,7 @@ namespace UglyTrivia
             return true;
         }
 
-        private bool didPlayerWin()
+        private bool DidPlayerWin()
         {
             return !(purses[currentPlayer] == 6);
         }
